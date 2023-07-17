@@ -1,0 +1,201 @@
+const login = (req, res) => {
+    const { email, password } = req.body;
+    const loginFields = {
+        email: email,
+        password: password
+    }
+    //Promise to run query 
+    new Promise((resolve, reject) => {
+        con.query(queries.findUserByEmail, [loginFields.email], (err, results) => {
+            if (err) {
+                console.error('Failed to retrieve user from the database:', err);
+                reject(err);
+            } else {
+                resolve(results);
+            }
+        });
+    })
+        //if query is performed then check for results
+        .then((results) => {
+            //check weather user exists or not
+            if (results.length === 0) {
+                res.status(401).json({ message: 'User does not exist' });
+            } else {
+                //comparinh password hash with password
+                const isMatch = comparePasswords(loginFields.password, results[0].password);
+                if (isMatch) {
+                    role = results[0].role.toLowerCase();
+                    console.log(role)
+                    res.status(200).json({ message: 'Login successful!' });
+                    return role;
+                } else {
+                    res.status(401).json({ message: 'Invalid email or password' });
+                }
+
+            }
+        })
+        .catch((err) => {
+            console.error('Error:', err);
+            res.status(500).json({ error: 'Internal Server Error' });
+        });
+};
+
+const addBookLib = async (addFields, req, res) => {
+    try {
+        con.beginTransaction(async (err) => {
+            if (err) throw err;
+
+            // Insert book into the books table
+            const bookQuery = 'INSERT INTO books (book_name, genre) VALUES (?, ?);';
+            const bookValues = [addFields.book_name, addFields.genre];
+            con.query(bookQuery, bookValues, (err, result) => {
+                if (err) {
+                    con.rollback(() => {
+                        throw err;
+                    });
+                }
+
+                // Insert author into the authors table
+                const authorQuery = 'INSERT INTO authors (author_name) VALUES (?);';
+                const authorValues = [addFields.author_name];
+                con.query(authorQuery, authorValues, (err, result) => {
+                    if (err) {
+                        con.rollback(() => {
+                            throw err;
+                        });
+                    }
+
+                    // Insert book-author relationship into book_authors table
+                    const bookAuthorQuery = 'INSERT INTO book_authors (book_id, author_id) VALUES (?, ?);';
+                    const bookAuthorValues = [result.insertId, result.insertId];
+                    con.query(bookAuthorQuery, bookAuthorValues, (err) => {
+                        if (err) {
+                            con.rollback(() => {
+                                throw err;
+                            });
+                        }
+
+                        con.commit((err) => {
+                            if (err) {
+                                con.rollback(() => {
+                                    throw err;
+                                });
+                            }
+
+                            res.status(201).send({ message: 'Book added successfully!' });
+                        });
+                    });
+                });
+            });
+        });
+    } catch (err) {
+        res.status(500).send('Internal Server Error: ' + err.message);
+    }
+};
+
+
+
+
+const addAuthorToBook = async (bookId, authorName, req, res) => {
+    try {
+        con.beginTransaction(async (err) => {
+            if (err) throw err;
+
+            // Insert author into the authors table
+            const authorQuery = 'INSERT INTO authors (author_name) VALUES (?);';
+            const authorValues = [authorName];
+            con.query(authorQuery, authorValues, (err, result) => {
+                if (err) {
+                    con.rollback(() => {
+                        throw err;
+                    });
+                }
+
+                // Insert book-author relationship into book_authors table
+                const bookAuthorQuery = 'INSERT INTO book_authors (book_id, author_id) VALUES (?, ?);';
+                const bookAuthorValues = [bookId, result.insertId];
+                con.query(bookAuthorQuery, bookAuthorValues, (err) => {
+                    if (err) {
+                        con.rollback(() => {
+                            throw err;
+                        });
+                    }
+
+                    con.commit((err) => {
+                        if (err) {
+                            con.rollback(() => {
+                                throw err;
+                            });
+                        }
+
+                        res.status(201).send({ message: 'Author added to the book successfully!' });
+                    });
+                });
+            });
+        });
+    } catch (err) {
+        res.status(500).send('Internal Server Error: ' + err.message);
+    }
+};
+
+
+const addBook = (req, res) => {
+    const { book_name, author_name, genre } = req.body;
+
+    if (!book_name || !author_name || !genre) {
+        return res.status(400).json({ error: 'Missing required data fields!' });
+    }
+
+    addBookWithAuthor(book_name, author_name, genre, req, res);
+};
+
+const addBookWithAuthor = async (bookName, authorName, genre, req, res) => {
+    try {
+        // Check if the author already exists
+        const authorQuery = 'SELECT author_id FROM authors WHERE author_name = ?';
+        con.query(authorQuery, [authorName], (err, authorResult) => {
+            if (err) {
+                throw err;
+            }
+
+            if (authorResult.length > 0) {
+                const authorId = authorResult[0].author_id;
+                addBookToAuthor(authorId, bookName, genre, req, res);
+            } else {
+                // Create a new author
+                const insertAuthorQuery = 'INSERT INTO authors (author_name) VALUES (?)';
+                con.query(insertAuthorQuery, [authorName], (err, insertAuthorResult) => {
+                    if (err) {
+                        throw err;
+                    }
+
+                    const authorId = insertAuthorResult.insertId;
+                    addBookToAuthor(authorId, bookName, genre, req, res);
+                });
+            }
+        });
+    } catch (err) {
+        res.status(500).send('Internal Server Error: ' + err.message);
+    }
+};
+
+const addBookToAuthor = (authorId, bookName, genre, req, res) => {
+    const insertBookQuery = 'INSERT INTO books (book_name, genre) VALUES (?, ?)';
+    con.query(insertBookQuery, [bookName, genre], (err, insertBookResult) => {
+        if (err) {
+            res.status(500).send('Internal Server Error: ' + err.message);
+        }
+
+        const bookId = insertBookResult.insertId;
+        const insertBookAuthorQuery = 'INSERT INTO book_authors (book_id, author_id) VALUES (?, ?)';
+        con.query(insertBookAuthorQuery, [bookId, authorId], (err) => {
+            if (err) {
+                res.status(500).send('Internal Server Error: ' + err.message);
+            }
+
+            res.status(201).send({ message: 'Book added successfully!' });
+        });
+    });
+};
+  
+

@@ -105,7 +105,6 @@ const booksBorrowedByUser = `SELECT books.book_id, books.book_name, books.borrow
 
 const checkFine = `SELECT fine AS pending_fines FROM users WHERE email = ? `;
 // SQL query to calculate the pending fines for a user based on the overdue borrowed books
-//checking 
 
 module.exports = {
     registerUser,

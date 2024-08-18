@@ -3,7 +3,7 @@ const { registerLib, searchUserLib } = require('../lib/authLib.js'); // Importin
 const { hashPassword, comparePasswords } = require('../service/bcrypt.js'); // Importing password hashing and comparison functions
 
 var user = {
-    role: null,
+    user_role: null,
     id: null,
     userEmail: null
 };
@@ -43,14 +43,15 @@ const login = async (req, res, next) => {
         if (results[0].status == 'blocked') {
             return res.status(401).json({ message: 'User is blocked! Contact Administration' }); // User does not exist
         }
-        const isMatch = await comparePasswords(loginFields.password, results[0].password); // Comparing passwords
+        console.log(results[0].password)
+        const isMatch = await comparePasswords(loginFields.password, results[0].user_password); // Comparing passwords
         if (isMatch) { // Passwords match
-            user.role = results[0].role.toLowerCase();
+            user.role = results[0].user_role.toLowerCase();
             user.id = results[0].user_id;
-            user.userEmail = results[0].email;
-            const token = jwt.sign({ results: results[0].email, role: user.role }, "jwtSecret", { expiresIn: '800s' }); // Generating JWT token
+            user.userEmail = results[0].user_email;
+            const token = jwt.sign({ results: results[0].user_email, user_role: user.role }, "jwtSecret", { expiresIn: '800s' }); // Generating JWT token
             console.log(user.role, user.id, user.userEmail, token); // Logging user details and token
-            return res.status(200).json({ message: 'Login successful!', role: user.role, token: token }); // Sending success response with token
+            return res.status(200).json({ message: 'Login successful!', user_role: user.role, token: token }); // Sending success response with token
         } else {
             return res.status(401).json({ message: 'Invalid Details' }); // Invalid email or password
         }

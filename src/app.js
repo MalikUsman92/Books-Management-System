@@ -1,4 +1,3 @@
-// Importing required modules
 const express = require('express'); // Express framework for building web applications
 const bodyParser = require('body-parser'); // Middleware for parsing request bodies
 const env = require('dotenv'); // Module for managing environment variables
@@ -26,7 +25,7 @@ app.use('/user', authenticateUser, userRoutes); // User routes with authenticati
 DbCon();
 //Checks to ban Users
 setInterval(banUser, 24 * 60 * 60 * 1000)
-setInterval(pendingBooks, 20 * 1000)
+// setInterval(pendingBooks, 20 * 1000)
 // Start the server
 app.listen(PORT, () => {
     console.log(`Server listening at port http://localhost:${PORT}`);

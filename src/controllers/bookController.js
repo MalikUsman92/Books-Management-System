@@ -11,7 +11,7 @@ const {
     searchBorrowedBookAvalability, // Library function for searching borrowed book availability
     borrowBookLib, // Library function for borrowing a book
     returnBookLib, // Library function for returning a book
-    checkForPendingBook, // Library function for checking pending books
+    // checkForPendingBook, // Library function for checking pending books
     updateBorrowStatus // Library function for updating borrow status
 } = require('../lib/bookLib.js'); // Importing functions from bookLib module
 
@@ -74,12 +74,12 @@ const borrowBook = async(req, res) => {
     }
 }
 
-const pendingBooks = async (req, res) => {
-    const currentDate = new Date().toISOString().split('T')[0]; 
-    const results = await checkForPendingBook(req,res,currentDate);
-    updateBorrowStatus(req,res,results)
+// const pendingBooks = async (req, res) => {
+//     const currentDate = new Date().toISOString().split('T')[0]; 
+//     // const results = await checkForPendingBook(req,res,currentDate);
+//     updateBorrowStatus(req,res,results)
 
-}
+// }
 
 const returnBook = async (req, res) => {
     const user = authUser(); // Assuming authUser is a function that returns a user object
@@ -177,4 +177,5 @@ module.exports = {
     getBooksStatus, 
     borrowBook, 
     returnBook, 
-    pendingBooks };
+    // pendingBooks
+ };

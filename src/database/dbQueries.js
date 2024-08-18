@@ -1,9 +1,9 @@
 // User Related Queries
 
-const registerUser = 'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)';
+const registerUser = 'INSERT INTO users (user_name, user_email, user_password, user_role) VALUES (?, ?, ?, ?);';
 // SQL query to register a new user in the database
 
-const findUserByEmail = 'SELECT * FROM users WHERE email = ?';
+const findUserByEmail = 'SELECT * FROM users WHERE user_email = ?';
 // SQL query to find a user by their email address
 
 // Book Related Queries
@@ -85,16 +85,16 @@ const updateAuthor = 'UPDATE authors SET ? WHERE author_id = ?';
 
 // User-related Queries
 
-const checkForBan = `SELECT books.*, users.email, users.user_id 
+const checkForBan = `SELECT books.*, users.user_email, users.user_id 
                     FROM books 
-                    JOIN users ON books.borrowed_by_user_email = users.email 
-                    WHERE books.return_date < ? AND users.status = 'active';`;
+                    JOIN users ON books.borrowed_by_user_email = users.user_email 
+                    WHERE books.return_date < ? AND users.user_status = 'active';`;
 // SQL query to check for books with overdue return dates and active user status
 
-const banUser =  `UPDATE users SET status ='blocked' WHERE email = ?`;
+const banUser =  `UPDATE users SET user_status ='blocked' WHERE user_email = ?`;
 // SQL query to block a user by their email address
 
-const unbanUser =  `UPDATE users SET status = 'active' WHERE user_id = ?`;
+const unbanUser =  `UPDATE users SET user_status = 'active' WHERE user_id = ?`;
 // SQL query to unblock a user by their user ID
 
 const totalBorrowedBooks = 'SELECT COUNT(*) AS total_borrowed_books FROM books WHERE borrowed_by_user_email = ?';
@@ -103,7 +103,7 @@ const totalBorrowedBooks = 'SELECT COUNT(*) AS total_borrowed_books FROM books W
 const booksBorrowedByUser = `SELECT books.book_id, books.book_name, books.borrowed_date FROM books WHERE books.borrowed_by_user_email = ? AND books.book_status = 'borrowed'`;
 // SQL query to retrieve books borrowed by a user, including book ID, name, and borrowed date
 
-const checkFine = `SELECT fine AS pending_fines FROM users WHERE email = ? `;
+const checkFine = `SELECT fine AS pending_fines FROM users WHERE user_email = ? `;
 // SQL query to calculate the pending fines for a user based on the overdue borrowed books
 
 module.exports = {

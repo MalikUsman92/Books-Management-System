@@ -158,18 +158,18 @@ const borrowBookLib = async (req, res, borrowFields) => {
     );
 };
 // Check for pending books in the library
-const checkForPendingBook = async (req, res, currentDate) => {
-    return new Promise((resolve, reject) => {
-        con.query(queries.checkForPendBooks, [currentDate], (err, results) => {
-            if (err) {
-                console.error('Failed to execute database query:', err);
-                reject(err);
-            } else {
-                resolve(results);
-            }
-        });
-    });
-};
+// const checkForPendingBook = async (req, res, currentDate) => {
+//     return new Promise((resolve, reject) => {
+//         con.query(queries.checkForPendBooks, [currentDate], (err, results) => {
+//             if (err) {
+//                 console.error('Failed to execute database query:', err);
+//                 reject(err);
+//             } else {
+//                 resolve(results);
+//             }
+//         });
+//     });
+// };
 // Update borrow status for pending books in the library
 const updateBorrowStatus = async (req, res, results) => {
     if (results.length > 0) {
@@ -239,6 +239,6 @@ module.exports = {
     searchBorrowedBookAvalability,
     borrowBookLib,
     returnBookLib,
-    checkForPendingBook,
+    // checkForPendingBook,
     updateBorrowStatus
 };

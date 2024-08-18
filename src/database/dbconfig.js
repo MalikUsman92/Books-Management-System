@@ -9,12 +9,12 @@ const con = sql.createConnection({
     password: process.env.DB_PASSWORD,
     database: process.env.DB_DATABASE
 });
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.DB_PORT || 3000;
 
 const DbCon = async () => {
     try {
         await con.connect(() => {
-            console.log('Connected!');
+            console.log(`DB Connected on port :${PORT}`);
         });
     } catch (e) {
         console.log(e.message);

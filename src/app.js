@@ -1,5 +1,6 @@
 const express = require('express'); // Express framework for building web applications
-const bodyParser = require('body-parser'); // Middleware for parsing request bodies
+const bodyParser = require('body-parser');
+const cors = require('cors'); // Middleware for parsing request bodies
 const env = require('dotenv'); // Module for managing environment variables
 const { DbCon } = require('./database/dbconfig.js'); // Custom database configuration
 const authRoutes = require('./routes/authRoutes'); // Routes for authentication
@@ -12,6 +13,7 @@ env.config(); // Load environment variables
 const PORT = process.env.PORT || 3004; // Port for server to listen on
 const app = express(); // Create Express application
 
+app.use(cors());
 app.use(express.json()); // Parse incoming JSON data
 app.use(bodyParser.json()); // Parse request bodies as JSON
 app.use(bodyParser.urlencoded({ extended: true })); // Parse URL-encoded request bodies
